@@ -68,26 +68,26 @@ const buildPackage = async (rootPackagePath: string) => {
                         generateScopedName: createGenerateScopedName('rpv'),
                     },
                 }),
-                copy({
-                    // Copy file synchronously, so it can be removed by using the `del` plugin
-                    copySync: true,
-                    hook: 'writeBundle',
-                    targets: [
-                        {
-                            src: path.join(outputDir, `cjs/${packageName}.css`),
-                            dest: path.join(outputDir, 'styles'),
-                        },
-                        {
-                            src: path.join(outputDir, `cjs/${packageName}.css`),
-                            dest: path.join(outputDir, 'styles'),
-                            rename: 'index.css',
-                        },
-                    ],
-                }),
-                del({
-                    hook: 'writeBundle',
-                    targets: path.join(outputDir, `cjs/${packageName}.css`),
-                }),
+                // copy({
+                //     // Copy file synchronously, so it can be removed by using the `del` plugin
+                //     copySync: true,
+                //     hook: 'writeBundle',
+                //     targets: [
+                //         {
+                //             src: path.join(outputDir, `cjs/${packageName}.css`),
+                //             dest: path.join(outputDir, 'styles'),
+                //         },
+                //         {
+                //             src: path.join(outputDir, `cjs/${packageName}.css`),
+                //             dest: path.join(outputDir, 'styles'),
+                //             rename: 'index.css',
+                //         },
+                //     ],
+                // }),
+                // del({
+                //     hook: 'writeBundle',
+                //     targets: path.join(outputDir, `cjs/${packageName}.css`),
+                // }),
             ],
             onwarn: handleOnWarn,
         },
@@ -113,25 +113,25 @@ const buildPackage = async (rootPackagePath: string) => {
                         generateScopedName: createGenerateScopedName('rpv'),
                     },
                 }),
-                copy({
-                    copySync: true,
-                    hook: 'writeBundle',
-                    targets: [
-                        {
-                            src: path.join(outputDir, `cjs/${packageName}.min.css`),
-                            dest: path.join(outputDir, 'styles'),
-                        },
-                        {
-                            src: path.join(outputDir, `cjs/${packageName}.min.css`),
-                            dest: path.join(outputDir, 'styles'),
-                            rename: 'index.min.css',
-                        },
-                    ],
-                }),
-                del({
-                    hook: 'writeBundle',
-                    targets: path.join(outputDir, `cjs/${packageName}.min.css`),
-                }),
+                // copy({
+                //     copySync: true,
+                //     hook: 'writeBundle',
+                //     targets: [
+                //         {
+                //             src: path.join(outputDir, `cjs/${packageName}.min.css`),
+                //             dest: path.join(outputDir, 'styles'),
+                //         },
+                //         {
+                //             src: path.join(outputDir, `cjs/${packageName}.min.css`),
+                //             dest: path.join(outputDir, 'styles'),
+                //             rename: 'index.min.css',
+                //         },
+                //     ],
+                // }),
+                // del({
+                //     hook: 'writeBundle',
+                //     targets: path.join(outputDir, `cjs/${packageName}.min.css`),
+                // }),
                 terser(),
             ],
             onwarn: handleOnWarn,
@@ -141,6 +141,7 @@ const buildPackage = async (rootPackagePath: string) => {
     // Generate Typescript definitions
     fs.rmSync(outputDir, { recursive: true, force: true });
     fs.mkdirSync(outputDir);
+    fs.mkdirSync(path.join(outputDir, 'styles'));
     fs.copyFileSync(path.join(rootPackagePath, 'dist/index.js'), path.join(rootPackagePath, 'lib/index.js'));
 
     generateTypes(rootPackagePath);
@@ -151,6 +152,28 @@ const buildPackage = async (rootPackagePath: string) => {
             new Promise<RollupOutput>((resolveBuild) => {
                 rollup(rollupOption).then((build) => {
                     build.write(rollupOption.output as OutputOptions).then((out) => {
+                        if (fs.existsSync(path.join(outputDir, `cjs/${packageName}.css`))) {
+                            fs.copyFileSync(
+                                path.join(outputDir, `cjs/${packageName}.css`),
+                                path.join(outputDir, `styles/${packageName}.css`)
+                            );
+                            fs.copyFileSync(
+                                path.join(outputDir, `cjs/${packageName}.css`),
+                                path.join(outputDir, `styles/index.css`)
+                            );
+                            fs.unlinkSync(path.join(outputDir, `cjs/${packageName}.css`));
+                        }
+                        if (fs.existsSync(path.join(outputDir, `cjs/${packageName}.min.css`))) {
+                            fs.copyFileSync(
+                                path.join(outputDir, `cjs/${packageName}.min.css`),
+                                path.join(outputDir, `styles/${packageName}.min.css`)
+                            );
+                            fs.copyFileSync(
+                                path.join(outputDir, `cjs/${packageName}.min.css`),
+                                path.join(outputDir, `styles/index.min.css`)
+                            );
+                            fs.unlinkSync(path.join(outputDir, `cjs/${packageName}.min.css`));
+                        }
                         resolveBuild(out);
                     });
                 });
