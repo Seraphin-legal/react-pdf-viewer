@@ -44,11 +44,11 @@
         "react-dom": ">=16.8.0"
     },
     "publishConfig": {
-        "access": "public"
+        "registry": "https://pierrelasvigne.pkgs.visualstudio.com/_packaging/Seraphin/npm/registry/"
     },
     "scripts": {
         "js": "tsx ../../scripts/buildJs",
         "css": "tsx ../../scripts/buildCss",
-        "release": "npm publish --access public"
+        "release": "npm publish"
     }
 }
