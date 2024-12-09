@@ -64,7 +64,7 @@ export const Provider: React.FC<{
         },
     );
 
-    React.useInsertionEffect(() => {
+    React.useLayoutEffect(() => {
         let styleEle = document.head.querySelector(`style[id=${STYLE_ID}]`);
         if (!styleEle) {
             styleEle = document.createElement('style');
